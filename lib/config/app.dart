@@ -1,7 +1,7 @@
 import 'package:booklog/config/routes.dart';
-import 'package:booklog/widgets/widget_booklist.dart';
-import 'package:booklog/widgets/widget_home.dart';
-import 'package:booklog/widgets/widget_register_user.dart';
+import 'package:booklog/screens/booklist/presentation/widget_booklist.dart';
+import 'package:booklog/screens/home/presentation/widget_home.dart';
+import 'package:booklog/screens/auth/register/presentation/widget_register_user.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
