@@ -113,7 +113,7 @@ class _WidgetMenuState extends State<WidgetMenu> with SingleTickerProviderStateM
               scale: _animation,
               alignment: Alignment.bottomRight,
               child: Container(
-                margin: const EdgeInsets.only(bottom: 10, top: 50, left: 50),
+                margin: const EdgeInsets.only(bottom: 10, left: 50),
                 decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 8, 7, 13),
                   borderRadius: BorderRadius.circular(8.0),

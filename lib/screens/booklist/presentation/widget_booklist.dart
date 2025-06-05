@@ -221,8 +221,7 @@ class _WidgetBooklist extends State<WidgetBooklist>{
           },
         )
       ),
-      floatingActionButton: Row(
-        spacing: 3,
+      floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
