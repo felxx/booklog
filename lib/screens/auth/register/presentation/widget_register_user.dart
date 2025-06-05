@@ -1,3 +1,4 @@
+import 'package:booklog/config/routes.dart';
 import 'package:booklog/shared/widgets/service_terms.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration successful!')),
       );
-      Navigator.of(context).pop();
+      Navigator.pushReplacementNamed(context, Routes.home);
     }
   }
 
@@ -59,7 +60,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 40),
 
               TextFormField(
                 controller: _usernameController,
