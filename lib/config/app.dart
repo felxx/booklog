@@ -12,8 +12,9 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Booklog',
-      theme: ThemeData(
-        primarySwatch: Colors.amber,
+      theme: ThemeData( 
+        brightness: Brightness.dark,
+        primarySwatch: Colors.orange,
       ),
       initialRoute: Routes.home,
       routes: {
