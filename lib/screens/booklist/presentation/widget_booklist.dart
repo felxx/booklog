@@ -1,4 +1,7 @@
+import 'package:booklog/screens/booklist/presentation/add_book_dialog.dart';
+import 'package:booklog/shared/widgets/widget_menu.dart';
 import 'package:flutter/material.dart';
+
 
 class WidgetBooklist extends StatefulWidget{
   const WidgetBooklist({super.key});
@@ -40,9 +43,7 @@ class _WidgetBooklist extends State<WidgetBooklist>{
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lista de Livros'),
-      ),
+      appBar: AppBar(),
       body: ListView.builder(
         itemCount: livros.length,
         itemBuilder: (context, index) => ListTile(
@@ -220,117 +221,35 @@ class _WidgetBooklist extends State<WidgetBooklist>{
           },
         )
       ),
-
-      floatingActionButton: FloatingActionButton(onPressed: (){
-        showDialog(
-          context: context, builder: (context) => AlertDialog(
-            title: const Text('Adicionar Livro'),
-            content: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
-              child: Form(key: _formKey, autovalidateMode: AutovalidateMode.onUserInteraction, child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _tituloController,
-                    decoration: const InputDecoration(
-                      labelText: 'Título',
-                      hintText: 'Insira o título do livro'
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty){
-                        return 'Por favor, insira o título';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _autorController,
-                    decoration: const InputDecoration(
-                      labelText: 'Autor',
-                      hintText: 'Insira o autor do livro'
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty){
-                        return 'Por favor, insira o autor';
-                      }
-                      return null;
-                    },                    
-                  ),
-                  TextFormField(
-                    controller: _anoController,
-                    decoration: const InputDecoration(
-                      labelText: 'Ano',
-                      hintText: 'Insira o ano em que o livro foi publicado',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty){
-                        return 'Por favor, insira o ano em que o livro foi publicado';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _isbnController,
-                    decoration: const InputDecoration(
-                      labelText: 'ISBN',
-                      hintText: 'Insira a ISBN do livro'
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty){
-                        return 'Por favor, insira a ISBN';
-                      }
-                      return null;
-                    },
-                  ),   
-                ],
-              )),                             
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  if(_formKey.currentState!.validate()){
-                    setState((){
-                      livros.add({
-                          'titulo': _tituloController.text,
-                          'autor': _autorController.text,
-                          'ano': _anoController.text,
-                          'isbn': _isbnController.text,
+      floatingActionButton: Row(
+        spacing: 3,
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              showDialog<Map<String, String>>(
+                context: context,
+                builder: (BuildContext dialogContext) {
+                  return AddBookDialog(
+                    onBookAdded: (Map<String, String> newBook) {
+                      setState(() {
+                        livros.add(newBook);
                       });
-                    });
-
-                      _tituloController.clear();
-                      _autorController.clear();
-                      _anoController.clear();
-                      _isbnController.clear();
-
-                      Navigator.of(context).pop();
-                  }
+                    },
+                  );
                 },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white // Define the text color
-                ),
-                child: const Text('Confirmar')
-              ),
-              TextButton(
-                onPressed: () {
-                    _tituloController.clear();
-                    _autorController.clear();
-                    _anoController.clear();
-                    _isbnController.clear();
-
-                    Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white // Define the text color
-                ),
-                child: const Text('Cancelar')
-              )
-            ],
-          )
-        );
-      }, backgroundColor: Colors.amber, tooltip: 'Adicionar Livro', child: const Icon(Icons.add)),
+              );
+            },
+            tooltip: 'Add Book',
+            heroTag: 'add_book_fab',
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(height: 16),
+          const WidgetMenu(),
+        ],
+      ),
     );
   }
 }

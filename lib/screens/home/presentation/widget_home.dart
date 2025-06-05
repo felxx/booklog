@@ -1,4 +1,4 @@
-import 'package:booklog/config/routes.dart';
+import 'package:booklog/shared/widgets/widget_menu.dart';
 import 'package:flutter/material.dart';
 
 class WidgetHome extends StatelessWidget{
@@ -6,30 +6,8 @@ class WidgetHome extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    Widget createMenuButton({required IconData icon, required String name, required String route}){
-      return ListTile(
-        leading: Icon(icon),
-        title: Text(name),
-        onTap: () => Navigator.pushNamed(context, route),
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
-      
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.amber),
-              child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24))
-            ),
-            createMenuButton(icon: Icons.my_library_books, name: 'Lista de Livros', route: Routes.booklist),
-            createMenuButton(icon: Icons.person, name: 'Cadastre-se', route: Routes.registerUser),
-          ],
-        ),
-      ),
+      appBar: AppBar(),
       body: Container(
               margin: const EdgeInsets.all(30.0),
               child: const Text(
@@ -44,6 +22,7 @@ class WidgetHome extends StatelessWidget{
                 '• Pesquisa avançada: Encontre facilmente livros por autor, título, gêneros.\n',
               ),
             ),
-          );
+      floatingActionButton: const WidgetMenu(),
+    );
   }
 }
