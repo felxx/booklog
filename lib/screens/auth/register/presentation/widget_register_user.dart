@@ -34,7 +34,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
         return;
       }
 
-      // Implementar lógica de registro
+      // To-do: sign up logic
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration successful!')),
@@ -101,7 +101,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                   labelText: 'Password',
                   border: OutlineInputBorder(),
                 ),
-                obscureText: true, // Para esconder a senha
+                obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
@@ -142,6 +142,8 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                         _agreeToTerms = value ?? false;
                       });
                     },
+                    activeColor: Colors.amber,
+                    checkColor: Colors.black, 
                   ),
                   Expanded(
                     child: GestureDetector(
@@ -171,6 +173,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.amber,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
@@ -182,6 +185,9 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                  onPressed: () {
                    Navigator.of(context).pushNamed('/login');
                  },
+                 style: TextButton.styleFrom(
+                   foregroundColor: Colors.amber,
+                 ),
                  child: const Text('Already have an account? Log in'),
                ),
             ],
