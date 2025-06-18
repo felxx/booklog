@@ -9,6 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  mask_text_input_formatter:
+  sqflite:
+  path:
+  sqflite_common_ffi:
+  sqflite_common_ffi_web:
+  uuid:
 
 dev_dependencies:
   flutter_test:

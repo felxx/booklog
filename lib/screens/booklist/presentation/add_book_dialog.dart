@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/dto/book_dto.dart';
 
-typedef OnBookAddedCallback = void Function(Map<String, String> bookData);
+typedef OnBookAddedCallback = void Function(BookDTO book);
 
 class AddBookDialog extends StatefulWidget {
   final OnBookAddedCallback onBookAdded;
@@ -120,13 +121,13 @@ class _AddBookDialogState extends State<AddBookDialog> {
         TextButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              final bookData = {
-                'title': _titleController.text,
-                'author': _authorController.text,
-                'year': _yearController.text,
-                'isbn': _isbnController.text,
-              };
-              widget.onBookAdded(bookData);
+              final book = BookDTO(
+                title: _titleController.text,
+                author: _authorController.text,
+                year: int.tryParse(_yearController.text) ?? 0,
+                isbn: _isbnController.text,
+              );
+              widget.onBookAdded(book);
               _clearFields();
               Navigator.of(context).pop();
             }
