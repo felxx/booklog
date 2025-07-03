@@ -36,7 +36,7 @@ class BookDAO {
 
   Future<List<BookDTO>> findAll() async {
     final db = await Connection.get();
-    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    final List<Map<String, dynamic>> maps = await db.query(tableName, orderBy: 'title');
 
     return List.generate(maps.length, (i) {
       return BookDTO.fromMap(maps[i]);
