@@ -1,5 +1,8 @@
 import 'package:booklog/config/routes.dart';
+import 'package:booklog/core/database/dao/user_dao.dart';
+import 'package:booklog/core/dto/user_dto.dart';
 import 'package:booklog/shared/widgets/service_terms.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class WidgetRegisterUser extends StatefulWidget {
@@ -15,6 +18,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final UserDAO _userDAO = UserDAO();
   bool _agreeToTerms = false;
 
   @override
@@ -26,21 +30,38 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
     super.dispose();
   }
 
-  void _performRegistration() {
-    if(_formKey.currentState!.validate()) {
+  void _performRegistration() async {
+    if (_formKey.currentState!.validate()) {
       if (!_agreeToTerms) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You have to agree to our terms of service to continue.')),
+          const SnackBar(
+            content: Text('You must agree to the terms to continue.'),
+          ),
         );
         return;
       }
 
-      // To-do: sign up logic
+      final existingUser = await _userDAO.findByEmail(_emailController.text);
+      if (existingUser != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('This email is already registered.')),
+        );
+        return;
+      }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration successful!')),
+      final newUser = UserDTO(
+        username: _usernameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        role: 'READER',
       );
-      Navigator.pushReplacementNamed(context, Routes.home);
+
+      await _userDAO.save(newUser);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Registration successful!')));
+      Navigator.pushReplacementNamed(context, Routes.login);
     }
   }
 
@@ -61,7 +82,6 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
-
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(
@@ -76,7 +96,6 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 },
               ),
               const SizedBox(height: 20),
-
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -95,7 +114,6 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 },
               ),
               const SizedBox(height: 20),
-
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(
@@ -114,7 +132,6 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 },
               ),
               const SizedBox(height: 20),
-
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: const InputDecoration(
@@ -133,7 +150,6 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 },
               ),
               const SizedBox(height: 20),
-
               Row(
                 children: <Widget>[
                   Checkbox(
@@ -144,34 +160,53 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                       });
                     },
                     activeColor: Colors.amber,
-                    checkColor: Colors.black, 
+                    checkColor: Colors.black,
                   ),
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Terms of Service'),
-                            content: const SingleChildScrollView(
-                              child: ServiceTermsWidget(),
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                        children: <TextSpan>[
+                          const TextSpan(text: 'I agree with the '),
+                          TextSpan(
+                            text: 'terms of service',
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap = () {
+                                    showDialog(
+                                      context: context,
+                                      builder:
+                                          (context) => AlertDialog(
+                                            title: const Text(
+                                              'Terms of Service',
+                                            ),
+                                            content:
+                                                const SingleChildScrollView(
+                                                  child: ServiceTermsWidget(),
+                                                ),
+                                            actions: [
+                                              TextButton(
+                                                child: const Text('Close'),
+                                                onPressed: () => Navigator.of(context).pop(),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+                                  },
+                            style: const TextStyle(
+                              color: Colors.amber,
+                              decoration: TextDecoration.underline,
                             ),
-                            actions: [
-                              TextButton(
-                                child: const Text('Close'),
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                            ],
                           ),
-                        );
-                      },
-                      child: const Text('I agree with the terms of service'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 30),
-
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.amber,
@@ -182,15 +217,13 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 child: const Text('Sign Up'),
               ),
               const SizedBox(height: 20),
-               TextButton(
-                 onPressed: () {
-                   Navigator.of(context).pushNamed('/login');
-                 },
-                 style: TextButton.styleFrom(
-                   foregroundColor: Colors.amber,
-                 ),
-                 child: const Text('Already have an account? Log in'),
-               ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/login');
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.amber),
+                child: const Text('Already have an account? Log in'),
+              ),
             ],
           ),
         ),
