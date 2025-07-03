@@ -1,3 +1,4 @@
+import 'package:booklog/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:booklog/config/routes.dart';
 
@@ -6,7 +7,8 @@ class MenuItemData {
   final String label;
   final String routeName;
 
-  MenuItemData({required this.icon, required this.label, required this.routeName});
+  MenuItemData(
+      {required this.icon, required this.label, required this.routeName});
 }
 
 class WidgetMenu extends StatefulWidget {
@@ -16,31 +18,54 @@ class WidgetMenu extends StatefulWidget {
   State<WidgetMenu> createState() => _WidgetMenuState();
 }
 
-class _WidgetMenuState extends State<WidgetMenu> with SingleTickerProviderStateMixin {
+class _WidgetMenuState extends State<WidgetMenu>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  final AuthService _authService = AuthService();
   bool _isOpen = false;
-  bool get _isUserLoggedIn {
-    // TO-DO: implement test auth logic
-    return true;
-  }
 
   List<MenuItemData> get _currentMenuItems {
-    if (_isUserLoggedIn) {
+    if (_authService.isLoggedIn() && _authService.isAdmin()) {
       return [
         MenuItemData(icon: Icons.home, label: 'Home', routeName: Routes.home),
-        MenuItemData(icon: Icons.search, label: 'Search', routeName: Routes.search),
-        MenuItemData(icon: Icons.my_library_books, label: 'My Collection', routeName: Routes.booklist),
-        MenuItemData(icon: Icons.bar_chart, label: 'Statistics', routeName: Routes.statistics),
-        MenuItemData(icon: Icons.bookmark_add, label: 'Wishlist', routeName: Routes.wishlist),
-        MenuItemData(icon: Icons.settings, label: 'Settings', routeName: Routes.settings),
+        MenuItemData(
+            icon: Icons.search, label: 'Search', routeName: Routes.search),
+        MenuItemData(
+            icon: Icons.settings, label: 'Settings', routeName: Routes.settings),
+        MenuItemData(icon: Icons.logout, label: 'Logout', routeName: Routes.login),
       ];
-    } else {
-      // Certifique-se de que Routes.login e Routes.signIn estão definidos em booklog/config/routes.dart
+    }
+    else if (_authService.isLoggedIn()) {
       return [
         MenuItemData(icon: Icons.home, label: 'Home', routeName: Routes.home),
-        MenuItemData(icon: Icons.login, label: 'Login', routeName: Routes.login), // Ex: Routes.login
-        MenuItemData(icon: Icons.person_add, label: 'Sign Up', routeName: Routes.registerUser), // Ex: Routes.signIn
+        MenuItemData(
+            icon: Icons.search, label: 'Search', routeName: Routes.search),
+        MenuItemData(
+            icon: Icons.my_library_books,
+            label: 'My Collection',
+            routeName: Routes.booklist),
+        MenuItemData(
+            icon: Icons.bar_chart,
+            label: 'Statistics',
+            routeName: Routes.statistics),
+        MenuItemData(
+            icon: Icons.bookmark_add,
+            label: 'Wishlist',
+            routeName: Routes.wishlist),
+        MenuItemData(
+            icon: Icons.settings, label: 'Settings', routeName: Routes.settings),
+        MenuItemData(icon: Icons.logout, label: 'Logout', routeName: Routes.login),
+      ];
+    } 
+    else {
+      return [
+        MenuItemData(icon: Icons.home, label: 'Home', routeName: Routes.home),
+        MenuItemData(icon: Icons.login, label: 'Login', routeName: Routes.login),
+        MenuItemData(
+            icon: Icons.person_add,
+            label: 'Sign Up',
+            routeName: Routes.registerUser),
       ];
     }
   }
@@ -72,13 +97,18 @@ class _WidgetMenuState extends State<WidgetMenu> with SingleTickerProviderStateM
     });
   }
 
+  void _handleMenuTap(MenuItemData item) {
+    if (item.routeName == Routes.login && _authService.isLoggedIn()) {
+      _authService.logout();
+    }
+    _toggleMenu();
+    Navigator.popUntil(context, (route) => route.isFirst);
+    Navigator.pushNamed(context, item.routeName);
+  }
+
   Widget _buildGridMenuItem(MenuItemData item) {
     return GestureDetector(
-      onTap: () {
-        _toggleMenu();
-        Navigator.popUntil(context, (route) => route.isFirst);
-        Navigator.pushNamed(context, item.routeName);
-      },
+      onTap: () => _handleMenuTap(item),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -86,10 +116,10 @@ class _WidgetMenuState extends State<WidgetMenu> with SingleTickerProviderStateM
           Icon(item.icon, color: Colors.white, size: 20),
           const SizedBox(height: 4),
           Text(
-        item.label,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.white, fontSize: 10),
-        overflow: TextOverflow.ellipsis,
+            item.label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontSize: 10),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -101,7 +131,7 @@ class _WidgetMenuState extends State<WidgetMenu> with SingleTickerProviderStateM
     const int crossAxisCount = 3;
 
     final List<MenuItemData> menuItemsToDisplay = _currentMenuItems;
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -115,7 +145,7 @@ class _WidgetMenuState extends State<WidgetMenu> with SingleTickerProviderStateM
               child: Container(
                 margin: const EdgeInsets.only(bottom: 10, left: 50),
                 decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 8, 7, 13),
+                  color: const Color.fromARGB(255, 8, 7, 13),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: GridView.count(
@@ -133,10 +163,9 @@ class _WidgetMenuState extends State<WidgetMenu> with SingleTickerProviderStateM
           backgroundColor: Colors.amber,
           heroTag: "main_fab_toggle",
           child: AnimatedIcon(
-            icon: AnimatedIcons.menu_close,
-            progress: _animation,
-            color: Colors.black 
-          ),
+              icon: AnimatedIcons.menu_close,
+              progress: _animation,
+              color: Colors.black),
         ),
       ],
     );
