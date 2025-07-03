@@ -4,6 +4,8 @@ import 'package:booklog/shared/widgets/widget_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:booklog/core/dto/book_dto.dart';
 import 'package:booklog/core/database/dao/book_dao.dart';
+import 'package:booklog/core/auth/auth_service.dart';
+import 'package:booklog/core/database/dao/user_book_dao.dart';
 
 class WidgetSearch extends StatefulWidget {
   const WidgetSearch({super.key});
@@ -14,6 +16,8 @@ class WidgetSearch extends StatefulWidget {
 
 class _WidgetSearchState extends State<WidgetSearch> {
   final BookDAO _bookDAO = BookDAO();
+  final UserBookDAO _userBookDAO = UserBookDAO();
+  final AuthService _authService = AuthService();
   List<BookDTO> _books = [];
 
   @override
@@ -39,8 +43,28 @@ class _WidgetSearchState extends State<WidgetSearch> {
     _refreshBookList();
   }
 
+  Future<void> _addBookToUserList(int bookId, String status) async {
+    if (_authService.currentUser == null) return;
+    final userId = _authService.currentUser!.id!;
+
+    if (await _userBookDAO.isBookInUserList(userId, bookId, status)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Book is already in your $status.')),
+      );
+      return;
+    }
+
+    await _userBookDAO.addBookToUser(userId, bookId, status);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Book added to $status!')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool isAdmin = _authService.isAdmin();
+    bool isUserLoggedIn = _authService.isLoggedIn();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search'),
@@ -52,25 +76,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
           return ListTile(
             title: Text(book.title),
             subtitle: Text("${book.author}, ${book.year}"),
-            trailing: SizedBox(
-              width: 80,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => _showEditBookDialog(context, book),
-                    icon: const Icon(Icons.edit),
-                    color: Colors.amber,
-                    tooltip: 'Edit',
-                  ),
-                  IconButton(
-                    onPressed: () => _showDeleteConfirmationDialog(context, book.id!),
-                    icon: const Icon(Icons.delete),
-                    color: Colors.red,
-                    tooltip: 'Delete',
-                  )
-                ],
-              ),
-            ),
+            trailing: _buildTrailingWidget(book, isAdmin, isUserLoggedIn),
             onTap: () => _showBookDetailsDialog(context, book),
           );
         },
@@ -80,17 +86,64 @@ class _WidgetSearchState extends State<WidgetSearch> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          FloatingActionButton(
-            onPressed: () => _showAddBookDialog(context),
-            tooltip: 'Add Book',
-            heroTag: 'add_book_fab',
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(height: 16),
+          if (isAdmin)
+            FloatingActionButton(
+              onPressed: () => _showAddBookDialog(context),
+              tooltip: 'Add Book',
+              heroTag: 'add_book_fab',
+              child: const Icon(Icons.add),
+            ),
+          if (isAdmin) const SizedBox(height: 16),
           const WidgetMenu(),
         ],
       ),
     );
+  }
+
+  Widget? _buildTrailingWidget(BookDTO book, bool isAdmin, bool isUserLoggedIn) {
+    if (!isUserLoggedIn) return null;
+
+    if (isAdmin) {
+      return SizedBox(
+        width: 100,
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: () => _showEditBookDialog(context, book),
+              icon: const Icon(Icons.edit),
+              color: Colors.amber,
+              tooltip: 'Edit',
+            ),
+            IconButton(
+              onPressed: () => _showDeleteConfirmationDialog(context, book.id!),
+              icon: const Icon(Icons.delete),
+              color: Colors.red,
+              tooltip: 'Delete',
+            )
+          ],
+        ),
+      );
+    } else {
+      return SizedBox(
+        width: 100,
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: () => _addBookToUserList(book.id!, 'collection'),
+              icon: const Icon(Icons.collections_bookmark),
+              color: Colors.green,
+              tooltip: 'Add to Collection',
+            ),
+            IconButton(
+              onPressed: () => _addBookToUserList(book.id!, 'wishlist'),
+              icon: const Icon(Icons.bookmark_add),
+              color: Colors.blue,
+              tooltip: 'Add to Wishlist',
+            )
+          ],
+        ),
+      );
+    }
   }
 
   void _showAddBookDialog(BuildContext context) {
