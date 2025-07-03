@@ -1,6 +1,5 @@
 // lib/config/app.dart
 import 'package:booklog/config/routes.dart';
-import 'package:booklog/screens/booklist/presentation/widget_booklist.dart';
 import 'package:booklog/screens/home/presentation/widget_home.dart';
 import 'package:booklog/screens/auth/register/presentation/widget_register_user.dart';
 import 'package:booklog/screens/auth/login/presentation/widget_login_user.dart';
@@ -25,7 +24,6 @@ class App extends StatelessWidget {
       initialRoute: Routes.home,
       routes: {
         Routes.home :(context) => WidgetHome(),
-        Routes.booklist :(context) => const WidgetBooklist(),
         Routes.registerUser :(context) => const WidgetRegisterUser(),
         Routes.login :(context) => const WidgetLoginUser(),
         Routes.statistics :(context) => const WidgetStatistics(),

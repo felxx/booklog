@@ -21,8 +21,6 @@ class Connection {
 
       final String path = join(await getDatabasesPath(), 'booklog.db');
 
-      await deleteDatabase(path);
-
       _db = await openDatabase(
         path,
         version: 1,

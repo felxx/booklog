@@ -7,9 +7,9 @@ class AddBookDialog extends StatefulWidget {
   final OnBookAddedCallback onBookAdded;
 
   const AddBookDialog({
-    Key? key,
+    super.key,
     required this.onBookAdded,
-  }) : super(key: key);
+  });
 
   @override
   State<AddBookDialog> createState() => _AddBookDialogState();
