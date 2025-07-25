@@ -10,3 +10,11 @@
 - **Advanced search**: Easily find books by author, title, and genre.
 
 ### To be implemented:
+- [ ] Página Home estilo dashboard com algumas informações (livros recém acessados, livros em tendência, etc.)
+- [ ] Integração com a API do Google Books
+- [ ] Visualização em galeria dos livros (futuramente implementar também a visualização em lista)
+- [ ] Filtros de busca para melhor pesquisa de livros
+- [ ] Status de leitura para os livros do usuário, separando por abas dentro da coleção do usuário
+- [ ] Mais opções de adição dentro da página de pesquisa
+- [ ] Página de estatísticas com gráficos
+- [ ] Aprimorar a página de configuração do aplicativo, para que tenha mais opções

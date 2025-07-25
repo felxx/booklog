@@ -32,11 +32,13 @@ class _WidgetMenuState extends State<WidgetMenu>
         MenuItemData(
             icon: Icons.search, label: 'Search', routeName: Routes.search),
         MenuItemData(
-            icon: Icons.settings, label: 'Settings', routeName: Routes.settings),
-        MenuItemData(icon: Icons.logout, label: 'Logout', routeName: Routes.login),
+            icon: Icons.settings,
+            label: 'Settings',
+            routeName: Routes.settings),
+        MenuItemData(
+            icon: Icons.logout, label: 'Logout', routeName: Routes.login),
       ];
-    }
-    else if (_authService.isLoggedIn()) {
+    } else if (_authService.isLoggedIn()) {
       return [
         MenuItemData(icon: Icons.home, label: 'Home', routeName: Routes.home),
         MenuItemData(
@@ -54,14 +56,17 @@ class _WidgetMenuState extends State<WidgetMenu>
             label: 'Wishlist',
             routeName: Routes.wishlist),
         MenuItemData(
-            icon: Icons.settings, label: 'Settings', routeName: Routes.settings),
-        MenuItemData(icon: Icons.logout, label: 'Logout', routeName: Routes.login),
+            icon: Icons.settings,
+            label: 'Settings',
+            routeName: Routes.settings),
+        MenuItemData(
+            icon: Icons.logout, label: 'Logout', routeName: Routes.login),
       ];
-    } 
-    else {
+    } else {
       return [
         MenuItemData(icon: Icons.home, label: 'Home', routeName: Routes.home),
-        MenuItemData(icon: Icons.login, label: 'Login', routeName: Routes.login),
+        MenuItemData(
+            icon: Icons.login, label: 'Login', routeName: Routes.login),
         MenuItemData(
             icon: Icons.person_add,
             label: 'Sign Up',
