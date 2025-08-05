@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "334802973298",
+    "project_id": "booklog-3c37f",
+    "storage_bucket": "booklog-3c37f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334802973298:android:5ac28746a16e44893248eb",
+        "android_client_info": {
+          "package_name": "com.felxx.booklog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJrE86-DHA-cKl0jMRPXpKJFh3bZDbvtg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
