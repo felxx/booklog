@@ -39,11 +39,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Supabase CLI
+      - name: Install Supabase CLI (universal)
         run: |
-          curl -sL https://github.com/supabase/cli/releases/latest/download/supabase-cli-linux-amd64 -o supabase
-          chmod +x supabase
-          sudo mv supabase /usr/local/bin/supabase
+          curl -fsSL https://supabase.com/cli/install | sh -s -- -b /usr/local/bin
+          supabase --version
 
       - name: Set up Supabase credentials
         run: |
