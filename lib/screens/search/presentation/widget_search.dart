@@ -52,20 +52,35 @@ class _WidgetSearchState extends State<WidgetSearch> {
   }
 
   Future<void> _addBookToUserList(String bookId, String status) async {
-    if (_authService.currentUser == null) return;
-    final userId = _authService.currentUser!.id!;
-
-    if (await _userBookDAO.isBookInUserList(userId, bookId, status)) {
+    final user = await _authService.getCurrentUser();
+    if (user == null || user.id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Book is already in your $status.')),
+        const SnackBar(content: Text('You must be logged in to add books.')),
       );
       return;
     }
+    final userId = user.id!;
 
-    await _userBookDAO.addBookToUser(userId, bookId, status);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Book added to $status!')),
-    );
+    try {
+      if (await _userBookDAO.isBookInUserList(userId, bookId, status)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Book is already in your $status.')),
+        );
+        return;
+      }
+
+      await _userBookDAO.addBookToUser(userId, bookId, status);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Book added to $status!')),
+      );
+      // Atualiza a lista após adicionar
+      await _refreshBookList();
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding book: $e')),
+      );
+    }
   }
 
   @override

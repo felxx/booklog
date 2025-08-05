@@ -13,7 +13,61 @@ class AuthService {
   AuthService._internal();
 
   final SupabaseService _supabaseService = SupabaseService();
-  UserDTO? currentUser;
+  UserDTO? _currentUser;
+
+  Future<UserDTO?> getCurrentUser() async {
+    if (_currentUser != null) return _currentUser;
+    final user = _supabaseService.currentUser;
+    if (user != null) {
+      try {
+        final userData = await _supabaseService
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .single();
+        _currentUser = UserDTO.fromMap({
+          'id': userData['id'],
+          'username': userData['username'] ?? user.email,
+          'email': user.email!,
+          'password': '',
+          'role': userData['role'] ?? 'USER',
+        });
+        return _currentUser;
+      } catch (e) {
+        if (e.toString().contains('PGRST116') || e.toString().contains('0 rows')) {
+          try {
+            await _supabaseService.from('profiles').insert({
+              'id': user.id,
+              'username': user.email,
+              'email': user.email,
+              'role': 'USER',
+              'created_at': DateTime.now().toIso8601String(),
+            });
+            final userData = await _supabaseService
+                .from('profiles')
+                .select()
+                .eq('id', user.id)
+                .single();
+            _currentUser = UserDTO.fromMap({
+              'id': userData['id'],
+              'username': userData['username'] ?? user.email,
+              'email': user.email!,
+              'password': '',
+              'role': userData['role'] ?? 'USER',
+            });
+            return _currentUser;
+          } catch (e2) {
+            print('Error creating user profile: $e2');
+            return null;
+          }
+        } else {
+          print('Error fetching user: $e');
+          return null;
+        }
+      }
+    }
+    return null;
+  }
 
 
   Future<AuthResponse?> signInWithEmail(String email, String password) async {
@@ -34,8 +88,7 @@ class AuthService {
             .select()
             .eq('id', response.user!.id)
             .single();
-        
-        currentUser = UserDTO.fromMap({
+        _currentUser = UserDTO.fromMap({
           'id': userData['id'],
           'username': userData['username'] ?? response.user!.email,
           'email': response.user!.email!,
@@ -75,8 +128,7 @@ class AuthService {
           'role': 'USER',
           'created_at': DateTime.now().toIso8601String(),
         });
-        
-        currentUser = UserDTO(
+        _currentUser = UserDTO(
           username: username,
           email: email.trim().toLowerCase(),
           password: '',
@@ -94,7 +146,7 @@ class AuthService {
   Future<void> logout() async {
     try {
       await _supabaseService.auth.signOut();
-      currentUser = null;
+      _currentUser = null;
     } catch (e) {
       print('Logout error: $e');
     }
@@ -105,7 +157,7 @@ class AuthService {
   }
 
   bool isAdmin() {
-    return currentUser?.role == 'ADMIN';
+    return _currentUser?.role == 'ADMIN';
   }
 
   User? get supabaseUser => _supabaseService.currentUser;
@@ -113,25 +165,6 @@ class AuthService {
   Stream<AuthState> get authStateChanges => _supabaseService.authStateChanges;
 
   Future<void> initializeUser() async {
-    final user = _supabaseService.currentUser;
-    if (user != null) {
-      try {
-        final userData = await _supabaseService
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .single();
-        
-        currentUser = UserDTO.fromMap({
-          'id': userData['id'],
-          'username': userData['username'] ?? user.email,
-          'email': user.email!,
-          'password': '',
-          'role': userData['role'] ?? 'USER',
-        });
-      } catch (e) {
-        print('Error initializing user: $e');
-      }
-    }
+    await getCurrentUser();
   }
 }

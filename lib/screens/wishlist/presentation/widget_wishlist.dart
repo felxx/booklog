@@ -24,19 +24,23 @@ class _WidgetWishlistState extends State<WidgetWishlist> {
 
   Future<void> _loadWishlist() async {
     if (_authService.isLoggedIn()) {
-      final books =
-          await _userBookDAO.findBooksByUser(_authService.currentUser!.id!, 'wishlist');
-      setState(() {
-        _wishlistBooks = books;
-      });
+      final user = await _authService.getCurrentUser();
+      if (user != null && user.id != null) {
+        final books = await _userBookDAO.findBooksByUser(user.id!, 'wishlist');
+        setState(() {
+          _wishlistBooks = books;
+        });
+      }
     }
   }
 
   Future<void> _removeBookFromWishlist(String bookId) async {
     if (_authService.isLoggedIn()) {
-      await _userBookDAO.removeBookFromUser(
-          _authService.currentUser!.id!, bookId, 'wishlist');
-      _loadWishlist();
+      final user = await _authService.getCurrentUser();
+      if (user != null && user.id != null) {
+        await _userBookDAO.removeBookFromUser(user.id!, bookId, 'wishlist');
+        _loadWishlist();
+      }
     }
   }
 

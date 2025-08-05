@@ -24,19 +24,23 @@ class _WidgetBooklistState extends State<WidgetBooklist> {
 
   Future<void> _loadCollection() async {
     if (_authService.isLoggedIn()) {
-      final books = await _userBookDAO.findBooksByUser(
-          _authService.currentUser!.id!, 'collection');
-      setState(() {
-        _collectionBooks = books;
-      });
+      final user = await _authService.getCurrentUser();
+      if (user != null && user.id != null) {
+        final books = await _userBookDAO.findBooksByUser(user.id!, 'collection');
+        setState(() {
+          _collectionBooks = books;
+        });
+      }
     }
   }
 
   Future<void> _removeBookFromCollection(String bookId) async {
     if (_authService.isLoggedIn()) {
-      await _userBookDAO.removeBookFromUser(
-          _authService.currentUser!.id!, bookId, 'collection');
-      _loadCollection();
+      final user = await _authService.getCurrentUser();
+      if (user != null && user.id != null) {
+        await _userBookDAO.removeBookFromUser(user.id!, bookId, 'collection');
+        _loadCollection();
+      }
     }
   }
 
