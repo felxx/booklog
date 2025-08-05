@@ -27,13 +27,21 @@ class _WidgetSearchState extends State<WidgetSearch> {
   }
 
   Future<void> _refreshBookList() async {
-    final bookList = await _bookDAO.findAll();
-    setState(() {
-      _books = bookList;
-    });
+    try {
+      final bookList = await _bookDAO.findAll();
+      setState(() {
+        _books = bookList;
+      });
+      print('Loaded ${_books.length} books');
+    } catch (e) {
+      print('Error loading books: $e');
+      setState(() {
+        _books = [];
+      });
+    }
   }
 
-  Future<void> _deleteBook(int id) async {
+  Future<void> _deleteBook(String id) async {
     await _bookDAO.delete(id);
     _refreshBookList();
   }
@@ -43,7 +51,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
     _refreshBookList();
   }
 
-  Future<void> _addBookToUserList(int bookId, String status) async {
+  Future<void> _addBookToUserList(String bookId, String status) async {
     if (_authService.currentUser == null) return;
     final userId = _authService.currentUser!.id!;
 
@@ -171,7 +179,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, int bookId) {
+  void _showDeleteConfirmationDialog(BuildContext context, String bookId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

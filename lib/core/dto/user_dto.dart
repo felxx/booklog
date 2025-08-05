@@ -1,5 +1,5 @@
 class UserDTO {
-  final int? id;
+  final String? id;
   final String username;
   final String email;
   final String password;
@@ -15,10 +15,10 @@ class UserDTO {
 
   factory UserDTO.fromMap(Map<String, dynamic> map) {
     return UserDTO(
-      id: map['id'] as int?,
+      id: map['id'] as String?,
       username: map['username'] as String,
       email: map['email'] as String,
-      password: map['password'] as String,
+      password: map['password'] as String? ?? '',
       role: map['role'] as String,
     );
   }
@@ -28,13 +28,12 @@ class UserDTO {
       'id': id,
       'username': username,
       'email': email,
-      'password': password,
       'role': role,
     };
   }
 
   UserDTO copyWith({
-    int? id,
+    String? id,
     String? username,
     String? email,
     String? password,

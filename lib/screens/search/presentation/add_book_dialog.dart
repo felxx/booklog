@@ -124,7 +124,7 @@ class _AddBookDialogState extends State<AddBookDialog> {
               final book = BookDTO(
                 title: _titleController.text,
                 author: _authorController.text,
-                year: int.tryParse(_yearController.text) ?? 0,
+                publishedYear: int.tryParse(_yearController.text) ?? 0,
                 isbn: _isbnController.text,
               );
               widget.onBookAdded(book);

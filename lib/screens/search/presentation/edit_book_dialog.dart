@@ -47,7 +47,7 @@ class _EditBookDialogState extends State<EditBookDialog> {
       final updatedBook = widget.book.copyWith(
         title: _titleController.text,
         author: _authorController.text,
-        year: int.tryParse(_yearController.text) ?? widget.book.year,
+        publishedYear: int.tryParse(_yearController.text) ?? widget.book.publishedYear,
         isbn: _isbnController.text,
       );
       

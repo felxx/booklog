@@ -1,6 +1,6 @@
 import 'package:booklog/config/routes.dart';
-import 'package:booklog/core/database/dao/user_dao.dart';
-import 'package:booklog/core/dto/user_dto.dart';
+import 'package:booklog/core/auth/auth_service.dart';
+import 'package:booklog/core/utils/validation_utils.dart';
 import 'package:booklog/shared/widgets/service_terms.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +18,9 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final UserDAO _userDAO = UserDAO();
+  final AuthService _authService = AuthService();
   bool _agreeToTerms = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -36,32 +37,83 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('You must agree to the terms to continue.'),
+            backgroundColor: Colors.orange,
           ),
         );
         return;
       }
 
-      final existingUser = await _userDAO.findByEmail(_emailController.text);
-      if (existingUser != null) {
+      // Additional email validation
+      if (!ValidationUtils.isValidEmail(_emailController.text.trim())) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This email is already registered.')),
+          const SnackBar(
+            content: Text('Please enter a valid email address.'),
+            backgroundColor: Colors.red,
+          ),
         );
         return;
       }
 
-      final newUser = UserDTO(
-        username: _usernameController.text,
-        email: _emailController.text,
-        password: _passwordController.text,
-        role: 'READER',
-      );
+      setState(() {
+        _isLoading = true;
+      });
 
-      await _userDAO.save(newUser);
+      try {
+        final response = await _authService.signUpWithEmail(
+          _emailController.text.trim(),
+          _passwordController.text,
+          _usernameController.text.trim(),
+        );
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Registration successful!')));
-      Navigator.pushReplacementNamed(context, Routes.login);
+        if (response != null && response.user != null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Registration successful! Check your email.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pushReplacementNamed(context, Routes.login);
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Registration error. Please try again.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          String errorMessage = 'Registration error: ${e.toString()}';
+          
+          // Friendly error messages
+          if (e.toString().contains('email_address_invalid')) {
+            errorMessage = 'Please enter a valid email address.';
+          } else if (e.toString().contains('already_registered') || e.toString().contains('email_already_in_use')) {
+            errorMessage = 'This email is already registered.';
+          } else if (e.toString().contains('weak_password')) {
+            errorMessage = 'Password must be at least 6 characters long.';
+          } else if (e.toString().contains('invalid_email')) {
+            errorMessage = 'Invalid email format.';
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     }
   }
 
@@ -104,13 +156,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!value.contains('@') || !value.contains('.')) {
-                    return 'Enter a valid email';
-                  }
-                  return null;
+                  return ValidationUtils.getEmailErrorMessage(value ?? '');
                 },
               ),
               const SizedBox(height: 20),
@@ -122,13 +168,7 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                 ),
                 obscureText: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  if (value.length < 6) {
-                    return 'The password must be at least 6 characters long';
-                  }
-                  return null;
+                  return ValidationUtils.getPasswordErrorMessage(value ?? '');
                 },
               ),
               const SizedBox(height: 20),
@@ -213,8 +253,10 @@ class _WidgetRegisterUserState extends State<WidgetRegisterUser> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
-                onPressed: _performRegistration,
-                child: const Text('Sign Up'),
+                onPressed: _isLoading ? null : _performRegistration,
+                child: _isLoading 
+                  ? const CircularProgressIndicator(color: Colors.amber)
+                  : const Text('Sign Up'),
               ),
               const SizedBox(height: 20),
               TextButton(

@@ -3,58 +3,70 @@ import 'package:booklog/core/dto/book_dto.dart';
 
 class BookDAO {
   final String tableName = 'books';
-  final String columnId = 'id';
-  final String columnTitle = 'title';
-  final String columnAuthor = 'author';
-  final String columnYear = 'year';
-  final String columnIsbn = 'isbn';
 
   Future<BookDTO> save(BookDTO book) async {
-    final db = await Connection.get();
-    if (book.id == null) {
-      final newId = await db.insert(tableName, book.toMap());
-      return book.copyWith(id: newId);
-    } else {
-      await db.update(
-        tableName,
-        book.toMap(),
-        where: '$columnId = ?',
-        whereArgs: [book.id],
-      );
-      return book;
+    try {
+      final response = await Connection.from(tableName)
+          .upsert(book.toMap())
+          .select()
+          .single();
+      
+      return BookDTO.fromMap(response);
+    } catch (e) {
+      print('Error saving book: $e');
+      rethrow;
     }
   }
 
-  Future<void> delete(int id) async {
-    final db = await Connection.get();
-    await db.delete(
-      tableName,
-      where: '$columnId = ?',
-      whereArgs: [id],
-    );
+  Future<void> delete(String id) async {
+    try {
+      await Connection.from(tableName)
+          .delete()
+          .eq('id', id);
+    } catch (e) {
+      print('Error deleting book: $e');
+      rethrow;
+    }
   }
 
   Future<List<BookDTO>> findAll() async {
-    final db = await Connection.get();
-    final List<Map<String, dynamic>> maps = await db.query(tableName, orderBy: 'title');
+    try {
+      final response = await Connection.from(tableName)
+          .select()
+          .order('title');
 
-    return List.generate(maps.length, (i) {
-      return BookDTO.fromMap(maps[i]);
-    });
+      return response.map<BookDTO>((item) => BookDTO.fromMap(item)).toList();
+    } catch (e) {
+      print('Error fetching books: $e');
+      return [];
+    }
   }
 
-  Future<BookDTO?> findById(int id) async {
-    final db = await Connection.get();
-    final List<Map<String, dynamic>> maps = await db.query(
-      tableName,
-      where: '$columnId = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isNotEmpty) {
-      return BookDTO.fromMap(maps.first);
-    } else {
+  Future<BookDTO?> findById(String id) async {
+    try {
+      final response = await Connection.from(tableName)
+          .select()
+          .eq('id', id)
+          .single();
+      
+      return BookDTO.fromMap(response);
+    } catch (e) {
+      print('Error finding book by id: $e');
       return null;
+    }
+  }
+
+  Future<List<BookDTO>> searchBooks(String query) async {
+    try {
+      final response = await Connection.from(tableName)
+          .select()
+          .or('title.ilike.%$query%,author.ilike.%$query%')
+          .order('title');
+
+      return response.map<BookDTO>((item) => BookDTO.fromMap(item)).toList();
+    } catch (e) {
+      print('Error searching books: $e');
+      return [];
     }
   }
 }

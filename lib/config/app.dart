@@ -1,4 +1,5 @@
 import 'package:booklog/config/routes.dart';
+import 'package:booklog/core/auth/auth_wrapper.dart';
 import 'package:booklog/screens/home/presentation/widget_home.dart';
 import 'package:booklog/screens/auth/register/presentation/widget_register_user.dart';
 import 'package:booklog/screens/auth/login/presentation/widget_login_user.dart';
@@ -22,8 +23,9 @@ class App extends StatelessWidget {
         primarySwatch: Colors.amber,
         colorScheme: const ColorScheme.dark(primary: Colors.amber),
       ),
-      initialRoute: Routes.home,
+      initialRoute: '/',
       routes: {
+        '/': (context) => const AuthWrapper(),
         Routes.home: (context) => const WidgetHome(),
         Routes.registerUser: (context) => const WidgetRegisterUser(),
         Routes.login: (context) => const WidgetLoginUser(),

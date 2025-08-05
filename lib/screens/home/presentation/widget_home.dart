@@ -14,12 +14,12 @@ class WidgetHome extends StatelessWidget{
                 textAlign: TextAlign.justify,
                 style: TextStyle(fontSize: 30),
                 'Booklog 📔\n'
-                'Organize sua coleção de livros, seja física ou virtual.\n'
+                'Organize your book collection, whether physical or digital.\n'
                 '\n'
-                '• Adicione livros à sua coleção e crie listas para organizá-la da forma que quiser.\n'
-                '• Estatísticas: Acompanhe o progresso de leitura e estatísticas de livros lidos.\n'
-                '• Wishlist: Crie uma lista de desejos com os livros que deseja ler futuramente.\n'
-                '• Pesquisa avançada: Encontre facilmente livros por autor, título, gêneros.\n',
+                '• Add books to your collection and create lists to organize them however you want.\n'
+                '• Statistics: Track your reading progress and statistics of books read.\n'
+                '• Wishlist: Create a wishlist with books you want to read in the future.\n'
+                '• Advanced search: Easily find books by author, title, genres.\n',
               ),
             ),
       floatingActionButton: const WidgetMenu(),

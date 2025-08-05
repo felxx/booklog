@@ -32,7 +32,7 @@ class _WidgetWishlistState extends State<WidgetWishlist> {
     }
   }
 
-  Future<void> _removeBookFromWishlist(int bookId) async {
+  Future<void> _removeBookFromWishlist(String bookId) async {
     if (_authService.isLoggedIn()) {
       await _userBookDAO.removeBookFromUser(
           _authService.currentUser!.id!, bookId, 'wishlist');

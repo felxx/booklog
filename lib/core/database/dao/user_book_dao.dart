@@ -6,49 +6,62 @@ class UserBookDAO {
   final String userBooksTable = 'user_books';
   final String booksTable = 'books';
 
-  Future<void> addBookToUser(int userId, int bookId, String status) async {
-    final db = await Connection.get();
+  Future<void> addBookToUser(String userId, String bookId, String status) async {
     final userBook = UserBookDTO(
       userId: userId,
       bookId: bookId,
       status: status,
     );
-    await db.insert(
-      userBooksTable,
-      userBook.toMap(),
-    );
+    
+    await Connection.from(userBooksTable)
+        .insert(userBook.toMap());
   }
 
-  Future<void> removeBookFromUser(int userId, int bookId, String status) async {
-    final db = await Connection.get();
-    await db.delete(
-      userBooksTable,
-      where: 'user_id = ? AND book_id = ? AND status = ?',
-      whereArgs: [userId, bookId, status],
-    );
+  Future<void> removeBookFromUser(String userId, String bookId, String status) async {
+    await Connection.from(userBooksTable)
+        .delete()
+        .eq('user_id', userId)
+        .eq('book_id', bookId)
+        .eq('status', status);
   }
 
-  Future<List<BookDTO>> findBooksByUser(int userId, String status) async {
-    final db = await Connection.get();
-    final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT b.*
-      FROM $booksTable b
-      INNER JOIN $userBooksTable ub ON b.id = ub.book_id
-      WHERE ub.user_id = ? AND ub.status = ?
-    ''', [userId, status]);
+  Future<List<BookDTO>> findBooksByUser(String userId, String status) async {
+    final response = await Connection.from(userBooksTable)
+        .select('books(*)')
+        .eq('user_id', userId)
+        .eq('status', status);
 
-    return List.generate(maps.length, (i) {
-      return BookDTO.fromMap(maps[i]);
-    });
+    return response.map<BookDTO>((item) => BookDTO.fromMap(item['books'])).toList();
   }
 
-  Future<bool> isBookInUserList(int userId, int bookId, String status) async {
-    final db = await Connection.get();
-    final List<Map<String, dynamic>> maps = await db.query(
-      userBooksTable,
-      where: 'user_id = ? AND book_id = ? AND status = ?',
-      whereArgs: [userId, bookId, status],
-    );
-    return maps.isNotEmpty;
+  Future<bool> isBookInUserList(String userId, String bookId, String status) async {
+    try {
+      await Connection.from(userBooksTable)
+          .select()
+          .eq('user_id', userId)
+          .eq('book_id', bookId)
+          .eq('status', status)
+          .single();
+      
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<List<UserBookDTO>> findUserBooks(String userId) async {
+    final response = await Connection.from(userBooksTable)
+        .select()
+        .eq('user_id', userId);
+
+    return response.map<UserBookDTO>((item) => UserBookDTO.fromMap(item)).toList();
+  }
+
+  Future<void> updateBookStatus(String userId, String bookId, String oldStatus, String newStatus) async {
+    await Connection.from(userBooksTable)
+        .update({'status': newStatus})
+        .eq('user_id', userId)
+        .eq('book_id', bookId)
+        .eq('status', oldStatus);
   }
 }

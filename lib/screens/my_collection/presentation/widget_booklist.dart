@@ -32,7 +32,7 @@ class _WidgetBooklistState extends State<WidgetBooklist> {
     }
   }
 
-  Future<void> _removeBookFromCollection(int bookId) async {
+  Future<void> _removeBookFromCollection(String bookId) async {
     if (_authService.isLoggedIn()) {
       await _userBookDAO.removeBookFromUser(
           _authService.currentUser!.id!, bookId, 'collection');
