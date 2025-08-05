@@ -39,10 +39,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Supabase CLI (universal)
-        run: |
-          curl -fsSL https://supabase.com/cli/install | sh -s -- -b /usr/local/bin
-          supabase --version
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli-action@v1
+        with:
+          version: latest
 
       - name: Set up Supabase credentials
         run: |
@@ -51,13 +51,14 @@ jobs:
 
       - name: Supabase DB push (migrations)
         run: |
-          supabase link --project-ref $SUPABASE_PROJECT_ID --password $SUPABASE_ACCESS_TOKEN
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           supabase db push
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
   android-distribution:
     needs: build-test
@@ -73,11 +74,22 @@ jobs:
           channel: 'stable'
           architecture: X64
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --release
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
