@@ -33,33 +33,33 @@ jobs:
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
 
   supabase_deploy:
-    needs: test_and_analyze
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      needs: test_and_analyze
+      runs-on: ubuntu-latest
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
+        - name: Setup Supabase CLI
+          uses: supabase/setup-cli@v1
+          with:
+            version: latest
 
-      - name: Supabase DB push (migrations)
-        run: supabase db push --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        - name: Link Supabase project and push migrations
+          run: |
+            supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+            supabase db push
+          env:
+            SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+            SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
   build_and_distribute_android:
     needs: test_and_analyze
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     permissions:
       contents: 'read'
       id-token: 'write'
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -85,12 +85,16 @@ jobs:
           flutter build apk --release
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
 
       - name: Distribute APK via Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Action@v1
+        uses: firebase-actions/firebase-app-distribution@v1
         with:
           appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           groups: "testers"
           file: build/app/outputs/flutter-apk/app-release.apk
 
