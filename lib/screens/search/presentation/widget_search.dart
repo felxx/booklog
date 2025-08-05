@@ -32,9 +32,9 @@ class _WidgetSearchState extends State<WidgetSearch> {
       setState(() {
         _books = bookList;
       });
-      print('Loaded ${_books.length} books');
+      // debugPrint('Loaded ${_books.length} books');
     } catch (e) {
-      print('Error loading books: $e');
+      // debugPrint('Error loading books: $e');
       setState(() {
         _books = [];
       });

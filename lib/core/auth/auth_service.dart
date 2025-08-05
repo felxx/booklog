@@ -57,11 +57,11 @@ class AuthService {
             });
             return _currentUser;
           } catch (e2) {
-            print('Error creating user profile: $e2');
+            // debugPrint('Error creating user profile: $e2');
             return null;
           }
         } else {
-          print('Error fetching user: $e');
+          // debugPrint('Error fetching user: $e');
           return null;
         }
       }
@@ -99,7 +99,7 @@ class AuthService {
       
       return response;
     } catch (e) {
-      print('Login error: $e');
+      // debugPrint('Login error: $e');
       return null;
     }
   }
@@ -138,7 +138,7 @@ class AuthService {
       
       return response;
     } catch (e) {
-      print('Registration error: $e');
+      // debugPrint('Registration error: $e');
       return null;
     }
   }
@@ -148,7 +148,7 @@ class AuthService {
       await _supabaseService.auth.signOut();
       _currentUser = null;
     } catch (e) {
-      print('Logout error: $e');
+      // debugPrint('Logout error: $e');
     }
   }
 

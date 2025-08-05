@@ -25,7 +25,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       await _authService.initializeUser();
     } catch (e) {
-      print('Error initializing authentication: $e');
+      // debugPrint('Error initializing authentication: $e');
     } finally {
       if (mounted) {
         setState(() {

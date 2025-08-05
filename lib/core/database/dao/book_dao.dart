@@ -13,7 +13,7 @@ class BookDAO {
       
       return BookDTO.fromMap(response);
     } catch (e) {
-      print('Error saving book: $e');
+      // debugPrint('Error saving book: $e');
       rethrow;
     }
   }
@@ -24,7 +24,7 @@ class BookDAO {
           .delete()
           .eq('id', id);
     } catch (e) {
-      print('Error deleting book: $e');
+      // debugPrint('Error deleting book: $e');
       rethrow;
     }
   }
@@ -37,7 +37,7 @@ class BookDAO {
 
       return response.map<BookDTO>((item) => BookDTO.fromMap(item)).toList();
     } catch (e) {
-      print('Error fetching books: $e');
+      // debugPrint('Error fetching books: $e');
       return [];
     }
   }
@@ -51,7 +51,7 @@ class BookDAO {
       
       return BookDTO.fromMap(response);
     } catch (e) {
-      print('Error finding book by id: $e');
+      // debugPrint('Error finding book by id: $e');
       return null;
     }
   }
@@ -65,7 +65,7 @@ class BookDAO {
 
       return response.map<BookDTO>((item) => BookDTO.fromMap(item)).toList();
     } catch (e) {
-      print('Error searching books: $e');
+      // debugPrint('Error searching books: $e');
       return [];
     }
   }
