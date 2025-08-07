@@ -20,4 +20,10 @@ class SupabaseService {
   User? get currentUser => auth.currentUser;
   
   bool get isAuthenticated => currentUser != null;
+
+  Future<void> signOut() async {
+    await auth.signOut();
+  }
+  
+  bool get isConnected => client.realtime.isConnected;
 }

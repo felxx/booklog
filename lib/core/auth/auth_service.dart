@@ -41,7 +41,6 @@ class AuthService {
               'username': user.email,
               'email': user.email,
               'role': 'USER',
-              'created_at': DateTime.now().toIso8601String(),
             });
             final userData = await _supabaseService
                 .from('profiles')
@@ -121,14 +120,23 @@ class AuthService {
       );
       
       if (response.user != null) {
-        await _supabaseService.from('profiles').insert({
-          'id': response.user!.id,
-          'username': username,
-          'email': email.trim().toLowerCase(),
-          'role': 'USER',
-          'created_at': DateTime.now().toIso8601String(),
-        });
+        final existingProfile = await _supabaseService
+          .from('profiles')
+          .select()
+          .eq('id', response.user!.id)
+          .maybeSingle();
+        
+        if (existingProfile == null) {
+          await _supabaseService.from('profiles').insert({
+            'id': response.user!.id,
+            'username': username,
+            'email': email.trim().toLowerCase(),
+            'role': 'USER',
+          });
+        }
+        
         _currentUser = UserDTO(
+          id: response.user!.id,
           username: username,
           email: email.trim().toLowerCase(),
           password: '',
